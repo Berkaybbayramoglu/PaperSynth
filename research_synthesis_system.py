@@ -718,8 +718,9 @@ class WriterAgent:
                 fixed_lines.append(line)
                 continue
             
-            # Preserve short section headings (< 80 chars, no sentence punctuation)
-            if len(stripped) < 80 and not any(char in stripped for char in '.,:;?!'):
+            # Preserve short section headings (< 60 chars, no sentence punctuation)
+            # More aggressive: only headings, convert everything else
+            if len(stripped) < 60 and not any(char in stripped for char in '.,:;?!'):
                 # This is a heading - keep ALL CAPS
                 fixed_lines.append(line)
             else:
@@ -878,6 +879,8 @@ class WriterAgent:
             "- DO NOT copy chunk markers, metadata, or organizational notes from synthesis\n"
             "- DO NOT include phrases like 'Chunk 1/4', 'END OF CHUNK', 'Continued in next chunk'\n"
             "- DO NOT include emoji or special symbols (🧭, ✅, 📌, →, ---)\n"
+            "- DO NOT REPEAT the same sentence or paragraph multiple times\n"
+            "- VARY your language - avoid repeating 'DOES NOT' or 'THE PAPER DOES NOT' excessively\n"
             "- Write ONLY the final report content - professional, clean, complete\n"
             "- Use EXACT terminology from synthesis but present it as integrated analysis\n\n"
             f"Write exhaustively detailed analysis focusing on what papers DID and ACCOMPLISHED. Include EVERY detail from the synthesis."
@@ -1065,6 +1068,8 @@ class WriterAgent:
             "- DO NOT copy chunk markers, metadata, or organizational notes from synthesis\n"
             "- DO NOT include phrases like 'Chunk 1/4', 'END OF CHUNK', 'Continued in next chunk'\n"
             "- DO NOT include emoji or special symbols (🧭, ✅, 📌, →, ---)\n"
+            "- DO NOT REPEAT the same sentence or paragraph multiple times\n"
+            "- VARY your language - avoid repeating 'DOES NOT' or 'THE PAPER DOES NOT' excessively\n"
             "- Write ONLY the final report content - professional, clean, complete\n"
             "- Use EXACT terminology from synthesis but present it as integrated analysis\n\n"
             f"Write exhaustively detailed analysis focusing on what papers DID and ACCOMPLISHED. Include EVERY detail from the synthesis."
@@ -1203,6 +1208,8 @@ class WriterAgent:
                 f"- DO NOT copy feedback section markers (=== REVIEWER FEEDBACK ===)\n"
                 f"- DO NOT include phrases like 'Chunk 1/4', 'END OF CHUNK', 'Continued in next chunk'\n"
                 f"- DO NOT include emoji or special symbols (🧭, ✅, 📌, →, ---)\n"
+                f"- DO NOT REPEAT the same sentence or paragraph multiple times\n"
+                f"- VARY your language - avoid repeating 'DOES NOT' or 'THE PAPER DOES NOT' excessively\n"
                 f"- Write ONLY the final corrected report - professional, clean, complete\n\n"
                 f"FIX INSTRUCTIONS:\n"
                 f"1. Read feedback carefully - it tells you exactly what to add or fix\n"
@@ -1229,6 +1236,8 @@ class WriterAgent:
                 f"- DO NOT copy feedback section markers (=== REVIEWER FEEDBACK ===)\n"
                 f"- DO NOT include phrases like 'Chunk 1/4', 'END OF CHUNK'\n"
                 f"- DO NOT include emoji or special symbols (🧭, ✅, 📌, →, ---)\n"
+                f"- DO NOT REPEAT the same sentence or paragraph multiple times\n"
+                f"- VARY your language - avoid repeating 'DOES NOT' or 'THE PAPER DOES NOT' excessively\n"
                 f"- Write ONLY the final report - professional, clean, complete\n\n"
                 f"STRUCTURE:\n"
                 f"1. OVERVIEW\n"
@@ -1291,6 +1300,8 @@ class WriterAgent:
                 f"- DO NOT copy chunk markers, metadata, or organizational notes from synthesis\n"
                 f"- DO NOT include phrases like 'Chunk 1/4', 'END OF CHUNK', 'Continued in next chunk'\n"
                 f"- DO NOT include emoji or special symbols (🧭, ✅, 📌, →, ---)\n"
+                f"- DO NOT REPEAT the same sentence or paragraph multiple times\n"
+                f"- VARY your language - avoid repeating 'DOES NOT' or 'THE PAPER DOES NOT' excessively\n"
                 f"- Write ONLY the final report content - professional, clean, complete\n"
                 f"- Use EXACT terminology from synthesis but present it as integrated analysis\n\n"
                 f"Synthesis data (extract content, ignore metadata):\n{synthesis[:20000]}"
@@ -2037,6 +2048,42 @@ class ResearchSynthesisBehaviorTree:
                 "iterations": 0,
                 "progress_summary": self.progress_tracker.get_summary()
             }
+        
+        # Verify paper count matches expected - with retry for missing papers
+        expected_count = len(paper_paths)
+        actual_count = len(papers)
+        if actual_count != expected_count:
+            print(f"⚠️  WARNING: Paper count mismatch! Expected {expected_count} papers but got {actual_count}")
+            print(f"Expected papers: {[Path(p).name for p in paper_paths]}")
+            print(f"Received papers: {[p.get('filename', 'UNKNOWN') for p in papers]}")
+            
+            # Find missing papers
+            received_filenames = {p.get('filename', '') for p in papers}
+            missing_paths = [p for p in paper_paths if Path(p).name not in received_filenames]
+            
+            if missing_paths:
+                print(f"🔄 Attempting to re-read {len(missing_paths)} missing paper(s)...")
+                print(f"Missing: {[Path(p).name for p in missing_paths]}")
+                
+                # Retry reading only the missing papers
+                retry_papers = await self.reader.read_papers(missing_paths)
+                
+                if retry_papers:
+                    # Filter valid papers from retry
+                    valid_retry = [p for p in retry_papers if isinstance(p, dict) and p.get('extracted')]
+                    if valid_retry:
+                        papers.extend(valid_retry)
+                        actual_count = len(papers)
+                        print(f"✅ Successfully recovered {len(valid_retry)} missing paper(s)")
+                        print(f"Total papers now: {actual_count}")
+                
+                # Final check after retry
+                if actual_count != expected_count:
+                    print(f"❌ CRITICAL: Still missing {expected_count - actual_count} paper(s) after retry!")
+                    print(f"Continuing with {actual_count} paper(s) - report quality will be affected")
+                    # Don't fail - continue with whatever we have
+                else:
+                    print(f"✅ All {expected_count} papers recovered successfully")
         
         # Phase 2: Analyze (with caching)
         await self.progress_tracker.log_stage("analyzing", "in_progress")
