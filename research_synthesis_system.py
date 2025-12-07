@@ -866,7 +866,8 @@ class WriterAgent:
             "- BALANCED TONE: Highlight contributions and value prominently. Scope boundaries mentioned constructively at end.\n"
             "- DEEPER COMPARISON: Identify shared themes, complementary approaches, divergent perspectives, synthesis opportunities.\n"
             "- VALUE PROPOSITION: Explain WHY each paper matters - contributions to field, who benefits, practical applications.\n"
-            "- STRUCTURED SYNTHESIS: In comparison, organize as: what was done first, similarities, differences, then implications.\n\n"
+            "- STRUCTURED SYNTHESIS: In comparison, organize as: what was done first, similarities, differences, then implications.\n"
+            "- CONCLUSIONS (if last chunk): Write ONLY 2-3 SHORT paragraphs. Summarize key takeaways, main contributions, and future implications. DO NOT REPEAT the same sentences. Keep it brief and impactful.\n\n"
             "CRITICAL: Write detailed analysis describing what papers ACCOMPLISHED. Be thorough but not repetitive. START with what EXISTS and was DONE, not what's absent."
         )
         
@@ -881,6 +882,7 @@ class WriterAgent:
             "- DO NOT include emoji or special symbols (🧭, ✅, 📌, →, ---)\n"
             "- DO NOT REPEAT the same sentence or paragraph multiple times\n"
             "- VARY your language - avoid repeating 'DOES NOT' or 'THE PAPER DOES NOT' excessively\n"
+            "- IF WRITING CONCLUSIONS: Keep them SHORT (2-3 paragraphs MAXIMUM). DO NOT repeat the same sentences.\n"
             "- Write ONLY the final report content - professional, clean, complete\n"
             "- Use EXACT terminology from synthesis but present it as integrated analysis\n\n"
             f"Write exhaustively detailed analysis focusing on what papers DID and ACCOMPLISHED. Include EVERY detail from the synthesis."
@@ -889,8 +891,8 @@ class WriterAgent:
         # Calculate safe token limit - account for ALL input (chunk + previous + synthesis)
         total_input_chars = len(chunk) + len(truncated_prev if previous_content else "") + len(synthesis_context) + 1000
         estimated_input = total_input_chars // 4
-        max_output = min(5000, 14200 - estimated_input - 500)  # Increased to 5000 for detailed reports
-        max_output = max(2500, max_output)  # Minimum 2500 tokens
+        max_output = min(6500, 14200 - estimated_input - 500)  # Increased to 6500 to prevent truncation loops
+        max_output = max(3000, max_output)  # Minimum 3000 tokens
         
         execution_settings = self.chat_service.get_prompt_execution_settings_class()(
             service_id=self.service_id,
@@ -1070,6 +1072,7 @@ class WriterAgent:
             "- DO NOT include emoji or special symbols (🧭, ✅, 📌, →, ---)\n"
             "- DO NOT REPEAT the same sentence or paragraph multiple times\n"
             "- VARY your language - avoid repeating 'DOES NOT' or 'THE PAPER DOES NOT' excessively\n"
+            "- IF WRITING CONCLUSIONS: Keep them SHORT (2-3 paragraphs MAXIMUM). DO NOT repeat the same sentences.\n"
             "- Write ONLY the final report content - professional, clean, complete\n"
             "- Use EXACT terminology from synthesis but present it as integrated analysis\n\n"
             f"Write exhaustively detailed analysis focusing on what papers DID and ACCOMPLISHED. Include EVERY detail from the synthesis."
@@ -1078,8 +1081,8 @@ class WriterAgent:
         # Calculate safe token limit - account for ALL input (chunk + previous + synthesis)
         total_input_chars = len(chunk) + len(truncated_prev if previous_content else "") + len(synthesis_context) + 1000
         estimated_input = total_input_chars // 4
-        max_output = min(5000, 14200 - estimated_input - 500)  # Increased to 5000 for detailed reports
-        max_output = max(2500, max_output)  # Minimum 2500 tokens
+        max_output = min(6500, 14200 - estimated_input - 500)  # Increased to 6500 to prevent truncation loops
+        max_output = max(3000, max_output)  # Minimum 3000 tokens
         
         execution_settings = self.chat_service.get_prompt_execution_settings_class()(
             service_id=self.service_id,
@@ -1746,6 +1749,8 @@ class ProgressTracker:
         self.progress = {
             "session_id": datetime.now().strftime("%Y%m%d_%H%M%S"),
             "started_at": datetime.now().isoformat(),
+            "expected_papers": 0,  # Set during initialization
+            "received_papers": 0,  # Updated after reading
             "stages": [],
             "papers": [],
             "metrics": {},
@@ -1791,6 +1796,27 @@ class ProgressTracker:
             self.progress["metrics"][metric_name] = value
             self._save_progress()
     
+    async def set_expected_papers(self, count: int):
+        """Set the expected number of papers at start (thread-safe)"""
+        async with self.lock:
+            self.progress["expected_papers"] = count
+            self._save_progress()
+            print(f"Progress Tracker: Expected papers set to {count}")
+    
+    async def set_received_papers(self, count: int):
+        """Update the actual number of papers received after reading (thread-safe)"""
+        async with self.lock:
+            self.progress["received_papers"] = count
+            expected = self.progress["expected_papers"]
+            self._save_progress()
+            
+            if count < expected:
+                print(f"⚠️  Progress Tracker: Paper count mismatch - Expected {expected}, received {count}")
+            elif count > expected:
+                print(f"⚠️  Progress Tracker: More papers than expected - Expected {expected}, received {count}")
+            else:
+                print(f"✅ Progress Tracker: All {count} papers received successfully")
+    
     async def log_order_verification(self, stage_name: str, verification_result: dict):
         """Log order verification result (thread-safe)"""
         async with self.lock:
@@ -1830,11 +1856,17 @@ class ProgressTracker:
         total_papers = len(self.progress["papers"])
         order_verified = all(v["verified"] for v in self.progress["order_verifications"]) if self.progress["order_verifications"] else True
         
+        expected = self.progress.get("expected_papers", 0)
+        received = self.progress.get("received_papers", 0)
+        paper_status = "✅ All papers received" if expected > 0 and expected == received else (
+            f"⚠️ {received}/{expected} papers" if expected > 0 else f"{total_papers} papers"
+        )
+        
         return (
             f"Progress Summary:\n"
             f"- Session: {self.progress['session_id']}\n"
             f"- Stages: {completed_stages} completed, {failed_stages} failed\n"
-            f"- Papers: {total_papers} processed\n"
+            f"- Papers: {paper_status} ({total_papers} tracked)\n"
             f"- Metrics: {len(self.progress['metrics'])} tracked\n"
             f"- Order Verifications: {len(self.progress['order_verifications'])} checks, {'✅ All passed' if order_verified else '❌ Some failed'}\n"
         )
@@ -2013,6 +2045,9 @@ class ResearchSynthesisBehaviorTree:
         if parallel_processing:
             print(f"Parallelization: Read batch={read_batch_size}, Analyze batch={analyze_batch_size}")
         
+        # Set expected paper count at the start
+        await self.progress_tracker.set_expected_papers(len(paper_paths))
+        
         await self.progress_tracker.log_stage("pipeline_start", "started", 
                                        {"paper_count": len(paper_paths), 
                                         "parallel": parallel_processing})
@@ -2037,6 +2072,9 @@ class ResearchSynthesisBehaviorTree:
         invalid_papers = [i for i, p in enumerate(papers) if not isinstance(p, dict) or not p.get('extracted')]
         if invalid_papers:
             print(f"WARNING: {len(invalid_papers)} papers have invalid structure")
+        
+        # Update received paper count in progress tracker
+        await self.progress_tracker.set_received_papers(len(papers))
         
         await self.progress_tracker.log_stage("reading", "completed", {"papers_read": len(papers)})
         
@@ -2071,8 +2109,8 @@ class ResearchSynthesisBehaviorTree:
                 print(f"🔄 Attempting to re-read {len(missing_paths)} missing paper(s)...")
                 print(f"Missing: {[Path(p).name for p in missing_paths]}")
                 
-                # Retry reading only the missing papers
-                retry_papers = await self.reader.read_papers(missing_paths)
+                # Retry reading only the missing papers (sequential for reliability)
+                retry_papers = await self.reader.read_multiple_papers(missing_paths, parallel=False)
                 
                 if retry_papers:
                     # Filter valid papers from retry
