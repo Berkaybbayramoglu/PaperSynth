@@ -113,11 +113,11 @@ Then start a local LLM server:
 ## Usage
 
 ```bash
-# Uses ./sample_papers by default
-python main.py
-
-# Or pick a different directory
+# Process every supported file in the given directory
 python main.py path/to/my_papers/
+
+# Or create a ./papers/ folder and run with no arguments
+python main.py
 ```
 
 You can mix PDF, TXT, and Markdown files in the same directory.
@@ -145,7 +145,6 @@ parallel mode off for those. Turn it on for vLLM, TGI, or hosted APIs.
 research-synthesis-system/
 ├── main.py                       # Entry point: wires agents, runs the pipeline
 ├── requirements.txt
-├── sample_papers/                # Drop your PDFs here (see sample_papers/README.md)
 └── research_synthesis/
     ├── agents/                   # One file per agent
     │   ├── reader.py

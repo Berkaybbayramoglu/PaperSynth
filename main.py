@@ -109,7 +109,7 @@ async def main(papers_directory: str = None) -> None:
     print("Creating agents...")
     tree = build_pipeline(kernel, service_id)
 
-    papers_dir = Path(papers_directory) if papers_directory else Path("sample_papers")
+    papers_dir = Path(papers_directory) if papers_directory else Path("papers")
     print(f"\nLooking for papers in: {papers_dir.absolute()}")
 
     paper_paths = discover_papers(papers_dir)
@@ -124,8 +124,8 @@ async def main(papers_directory: str = None) -> None:
             "  2. Add PDF, TXT, or MD research papers\n"
             "  3. Run: python main.py <directory_name>\n\n"
             "Example:\n"
-            "  python main.py sample_papers\n\n"
-            "Default: Looks for 'sample_papers' directory if no argument given"
+            "  python main.py papers\n\n"
+            "Default: Looks for 'papers' directory if no argument given"
         )
         return
 
