@@ -145,7 +145,7 @@ parallel mode off for those. Turn it on for vLLM, TGI, or hosted APIs.
 research-synthesis-system/
 ├── main.py                       # Entry point: wires agents, runs the pipeline
 ├── requirements.txt
-├── sample_papers/                # Sample PDFs included
+├── sample_papers/                # Drop your PDFs here (see sample_papers/README.md)
 └── research_synthesis/
     ├── agents/                   # One file per agent
     │   ├── reader.py
