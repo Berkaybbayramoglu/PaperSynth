@@ -1,4 +1,6 @@
-# Research Synthesis System
+# PaperSynth
+
+**Multi-agent research paper synthesis with a local LLM.**
 
 Drop a folder of research papers in, get a dense, multi-section synthesis
 report out (plain text + Word). Runs against a **local LLM** via LM Studio
