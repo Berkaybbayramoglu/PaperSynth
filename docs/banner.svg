@@ -1,0 +1,42 @@
+<svg width="100%" viewBox="0 0 680 240" role="img" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace">
+<title>PaperSynth — Multi-Agent Research Synthesis</title>
+<desc>Animated banner: research papers drift into a single synthesized report while the PaperSynth title assembles.</desc>
+<style>
+  .ps-bg     { fill:#14161c; }
+  .ps-title  { fill:#FAF9F5; font-size:54px; font-weight:800; letter-spacing:3px; animation: psIn 6s ease-in-out infinite; }
+  .ps-sub    { fill:#C2C0B6; font-size:14px; font-weight:500; letter-spacing:6px; }
+  .ps-paper  { opacity:0; }
+  .ps-p1 { animation: psFly1 6s ease-in-out infinite; } .ps-p2 { animation: psFly2 6s ease-in-out infinite 0.7s; }
+  .ps-report { animation: psPulse 6s ease-in-out infinite; }
+  .ps-line   { stroke:#7C9CFF; stroke-width:2; stroke-linecap:round; }
+  @keyframes psIn    { 0%,8% { opacity:0; transform:translateY(6px);} 16%,100% { opacity:1; transform:translateY(0);} }
+  @keyframes psFly1 { 0% { opacity:0; transform:translate(0,0);} 8% { opacity:0.95;} 40% { transform:translate(520px,0);} 55% { opacity:0.95; transform:translate(530px,48px);} 65%,100% { opacity:0; transform:translate(530px,48px);} }
+  @keyframes psFly2 { 0% { opacity:0; transform:translate(0,0);} 8% { opacity:0.95;} 40% { transform:translate(520px,0);} 55% { opacity:0.95; transform:translate(530px,-70px);} 65%,100% { opacity:0; transform:translate(530px,-70px);} }
+  @keyframes psPulse { 0%,55% { opacity:0.55;} 65%,90% { opacity:1;} 100% { opacity:0.55;} }
+  @media (prefers-reduced-motion: reduce) {
+    .ps-title,.ps-p1,.ps-p2,.ps-report { animation:none; } .ps-title { opacity:1; } .ps-report { opacity:1; }
+  }
+</style>
+<rect class="ps-bg" x="0" y="0" width="680" height="240" rx="14"/>
+
+<g class="ps-paper ps-p1">
+  <rect x="40" y="18" width="24" height="32" rx="3" fill="#2a2e3a" stroke="#9C9A92"/>
+  <line x1="45" y1="27" x2="59" y2="27" stroke="#9C9A92"/><line x1="45" y1="33" x2="59" y2="33" stroke="#9C9A92"/><line x1="45" y1="39" x2="55" y2="39" stroke="#9C9A92"/>
+</g>
+<g class="ps-paper ps-p2">
+  <rect x="40" y="194" width="24" height="32" rx="3" fill="#2a2e3a" stroke="#9C9A92"/>
+  <line x1="45" y1="203" x2="59" y2="203" stroke="#9C9A92"/><line x1="45" y1="209" x2="59" y2="209" stroke="#9C9A92"/><line x1="45" y1="215" x2="55" y2="215" stroke="#9C9A92"/>
+</g>
+<g class="ps-report">
+  <rect x="566" y="62" width="74" height="96" rx="5" fill="#1d2230" stroke="#7C9CFF" stroke-width="2"/>
+  <line class="ps-line" stroke="#7C9CFF" stroke-width="2" stroke-linecap="round" x1="578" y1="80" x2="628" y2="80"/>
+  <line class="ps-line" stroke="#7C9CFF" stroke-width="2" stroke-linecap="round" x1="578" y1="92" x2="628" y2="92" opacity="0.7"/>
+  <line class="ps-line" stroke="#7C9CFF" stroke-width="2" stroke-linecap="round" x1="578" y1="104" x2="618" y2="104" opacity="0.7"/>
+  <line class="ps-line" stroke="#7C9CFF" stroke-width="2" stroke-linecap="round" x1="578" y1="120" x2="628" y2="120" opacity="0.5"/>
+  <line class="ps-line" stroke="#7C9CFF" stroke-width="2" stroke-linecap="round" x1="578" y1="132" x2="610" y2="132" opacity="0.5"/>
+  <path d="M600 146 l6 6 12 -14" fill="none" stroke="#7CD992" stroke-width="2.5" stroke-linecap="round"/>
+</g>
+
+<text class="ps-title" x="290" y="128" text-anchor="middle" fill="#FAF9F5" font-size="54" font-weight="800" letter-spacing="3">PaperSynth</text>
+<text class="ps-sub" x="290" y="172" text-anchor="middle" fill="#C2C0B6" font-size="14" font-weight="500" letter-spacing="6">MULTI-AGENT RESEARCH SYNTHESIS</text>
+</svg>

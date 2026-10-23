@@ -1,0 +1,44 @@
+<svg width="100%" viewBox="0 0 830 310" role="img" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace">
+<title>PaperSynth agent pipeline</title>
+<desc>Papers flow through Reader, Analyzer, Synthesizer and Writer agents. Memory caches per-paper analyses, the Metrics Extractor feeds numeric results to the Writer, and the Reviewer, Chief Reviewer and Validator send the draft back to the Writer until it is approved.</desc>
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9C9A92"/></marker>
+<marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7C9CFF"/></marker>
+</defs>
+<rect x="0" y="0" width="830" height="310" rx="14" fill="#14161c"/>
+<g font-size="13" font-weight="700" fill="#FAF9F5" text-anchor="middle">
+<rect x="20" y="50" width="90" height="50" rx="8" fill="#1d2230" stroke="#9C9A92" stroke-width="1.5"/><text x="65" y="72">papers/</text>
+<rect x="135" y="50" width="110" height="50" rx="8" fill="#1d2230" stroke="#7C9CFF" stroke-width="2"/><text x="190" y="72">Reader</text>
+<rect x="270" y="50" width="125" height="50" rx="8" fill="#1d2230" stroke="#7C9CFF" stroke-width="2"/><text x="332" y="72">Analyzer</text>
+<rect x="420" y="50" width="120" height="50" rx="8" fill="#1d2230" stroke="#7C9CFF" stroke-width="2"/><text x="480" y="72">Synthesizer</text>
+<rect x="565" y="50" width="125" height="50" rx="8" fill="#1d2230" stroke="#7C9CFF" stroke-width="2"/><text x="627" y="72">Writer</text>
+<rect x="715" y="50" width="95" height="50" rx="8" fill="#1d2230" stroke="#9C9A92" stroke-width="1.5"/><text x="762" y="72">report</text>
+<rect x="270" y="150" width="125" height="44" rx="8" fill="#1d2230" stroke="#9C9A92" stroke-width="1.5"/><text x="332" y="170">Memory</text>
+<rect x="420" y="150" width="120" height="44" rx="8" fill="#1d2230" stroke="#9C9A92" stroke-width="1.5"/><text x="480" y="170">Metrics</text>
+<rect x="565" y="222" width="80" height="44" rx="8" fill="#2a2232" stroke="#E39BC7" stroke-width="1.5"/><text x="605" y="242">Reviewer</text>
+<rect x="652" y="222" width="70" height="44" rx="8" fill="#2a2232" stroke="#E39BC7" stroke-width="1.5"/><text x="687" y="242">Chief</text>
+<rect x="729" y="222" width="85" height="44" rx="8" fill="#2a2232" stroke="#E39BC7" stroke-width="1.5"/><text x="771" y="242">Validator</text>
+</g>
+<g font-size="10" fill="#C2C0B6" text-anchor="middle">
+<text x="65" y="88">PDF/TXT/MD</text><text x="190" y="88">extract details</text><text x="332" y="88">per-paper analysis</text>
+<text x="480" y="88">chunked merge</text><text x="627" y="88">cumulative context</text><text x="762" y="88">.txt + .docx</text>
+<text x="332" y="185">hash-keyed cache</text><text x="480" y="185">numeric results</text>
+<text x="605" y="257">detail</text><text x="687" y="257">approval</text><text x="771" y="257">grounding</text>
+</g>
+<g stroke="#9C9A92" stroke-width="1.5" fill="none">
+<line x1="110" y1="75" x2="133" y2="75" marker-end="url(#a)"/>
+<line x1="245" y1="75" x2="268" y2="75" marker-end="url(#a)"/>
+<line x1="395" y1="75" x2="418" y2="75" marker-end="url(#a)"/>
+<line x1="540" y1="75" x2="563" y2="75" marker-end="url(#a)"/>
+<line x1="690" y1="75" x2="713" y2="75" marker-end="url(#a)"/>
+<line x1="332" y1="100" x2="332" y2="148" marker-end="url(#a)"/>
+<line x1="480" y1="100" x2="480" y2="148" marker-end="url(#a)"/>
+<path d="M540 172 L580 172 L580 102" marker-end="url(#a)"/>
+<path d="M620 100 L620 140 L687 140 L687 220" marker-end="url(#a)"/>
+</g>
+<rect x="558" y="214" width="263" height="60" rx="10" fill="none" stroke="#E39BC7" stroke-width="1" stroke-dasharray="3 3"/>
+<path d="M771 214 L771 125 L650 125 L650 102" stroke="#7C9CFF" stroke-width="1.8" fill="none" stroke-dasharray="5 4" marker-end="url(#b)"/>
+<text x="735" y="160" font-size="10" fill="#7C9CFF" text-anchor="middle">revise until</text>
+<text x="735" y="173" font-size="10" fill="#7C9CFF" text-anchor="middle">approved</text>
+<text x="20" y="295" font-size="10" fill="#C2C0B6">Every box is an agent: a Semantic Kernel chat call with its own prompt.</text>
+</svg>
